@@ -695,25 +695,19 @@ def uploadee(url):
     else:
         raise DirectDownloadLinkException("ERROR: Direct Link not found")
 
-
 def terabox(url, video_quality="HD Video", save_dir="HD_Video"):
     """Terabox direct link generator
     https://github.com/Dawn-India/Z-Mirror"""
 
     pattern = r"/s/(\w+)|surl=(\w+)"
-    if not search(pattern, url):
+    if not re.search(pattern, url):
         raise DirectDownloadLinkException("ERROR: Invalid terabox URL")
 
     netloc = urlparse(url).netloc
     terabox_url = url.replace(netloc, "1024tera.com")
 
-    urls = [
-        "https://ytshorts.savetube.me/api/v1/terabox-downloader",
-        f"https://teraboxvideodownloader.nepcoderdevs.workers.dev/?url={terabox_url}",
-        f"https://terabox.udayscriptsx.workers.dev/?url={terabox_url}",
-        f"https://mavimods.serv00.net/Mavialt.php?url={terabox_url}",
-        f"https://mavimods.serv00.net/Mavitera.php?url={terabox_url}",
-    ]
+    # Updated API endpoint
+    api_url = f"https://wdzone-terabox-api.vercel.app/api?url={terabox_url}"
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
@@ -727,31 +721,25 @@ def terabox(url, video_quality="HD Video", save_dir="HD_Video"):
         "Sec-Fetch-Site": "same-origin",
     }
 
-    for base_url in urls:
-        try:
-            if "api/v1" in base_url:
-                response = post(base_url, headers=headers, json={"url": terabox_url})
-            else:
-                response = get(base_url)
-
-            if response.status_code == 200:
-                break
-        except RequestException as e:
-            raise DirectDownloadLinkException(f"ERROR: {e.__class__.__name__}") from e
-    else:
-        raise DirectDownloadLinkException("ERROR: Unable to fetch the JSON data")
+    try:
+        response = get(api_url, headers=headers)
+        if response.status_code != 200:
+            raise DirectDownloadLinkException("ERROR: Unable to fetch the JSON data")
+    except RequestException as e:
+        raise DirectDownloadLinkException(f"ERROR: {e.__class__.__name__}") from e
 
     data = response.json()
     details = {"contents": [], "title": "", "total_size": 0}
 
-    for item in data["response"]:
-        title = item["title"]
-        resolutions = item.get("resolutions", {})
-        if zlink := resolutions.get(video_quality):
+    # Extract information from the new API response
+    if "✅ Status" in data and data["✅ Status"] == "Success":
+        for item in data["📜 Extracted Info"]:
+            title = item["📂 Title"]
+            download_link = item["🔽 Direct Download Link"]
             details["contents"].append(
-                {"url": zlink, "filename": title, "path": ospath.join(title, save_dir)}
+                {"url": download_link, "filename": title, "path": ospath.join(title, save_dir)}
             )
-        details["title"] = title
+            details["title"] = title
 
     if not details["contents"]:
         raise DirectDownloadLinkException("ERROR: No valid download links found")
@@ -760,7 +748,6 @@ def terabox(url, video_quality="HD Video", save_dir="HD_Video"):
         return details["contents"][0]["url"]
 
     return details
-
 
 def filepress(url):
     with create_scraper() as session:
