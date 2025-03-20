@@ -700,7 +700,7 @@ def terabox(url, video_quality="HD Video", save_dir="HD_Video"):
     https://github.com/Dawn-India/Z-Mirror"""
 
     pattern = r"/s/(\w+)|surl=(\w+)"
-    if not re.search(pattern, url):
+    if not search(pattern, url):
         raise DirectDownloadLinkException("ERROR: Invalid terabox URL")
 
     netloc = urlparse(url).netloc
