@@ -388,13 +388,9 @@ NOTE: Try each command without any argument to see more detalis.
 """
 
 BOT_COMMANDS = {
-    "Mirror": "[link/file] Mirror to Upload Destination",
-    "QbMirror": "[magnet/torrent] Mirror to Upload Destination using qbit",
-    "Ytdl": "[link] Mirror YouTube, m3u8, Social Media and yt-dlp supported urls",
     "Leech": "[link/file] Leech files to Upload to Telegram",
     "QbLeech": "[magnet/torrent] Leech files to Upload to Telegram using qbit",
     "YtdlLeech": "[link] Leech YouTube, m3u8, Social Media and yt-dlp supported urls",
-    "Clone": "[link] Clone files/folders to GDrive",
     "UserSet": "User personal settings",
     "ForceStart": "[gid/reply] Force start from queued task",
     "Count": "[link] Count no. of files/folders in GDrive",
